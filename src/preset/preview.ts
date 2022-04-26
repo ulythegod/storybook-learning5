@@ -8,7 +8,19 @@
  *
  * https://storybook.js.org/docs/react/writing-stories/decorators#gatsby-focus-wrapper
  */
-import { withGlobals } from "../withGlobals";
-import { withRoundTrip } from "../withRoundTrip";
+import { withGlobals } from '../withGlobals';
 
-export const decorators = [withGlobals, withRoundTrip];
+export const decorators = [withGlobals];
+
+function config(entry: any [] = []) {
+    return [...entry, require.resolve("/dist/esm/preset/preview")];
+}
+
+function managerEntries(entry: any[] = []) {
+    return [...entry, require.resolve("/dist/esm/preset/manager")];
+}
+
+export {
+    managerEntries,
+    config,
+};

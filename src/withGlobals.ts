@@ -1,23 +1,34 @@
 import type { DecoratorFunction } from "@storybook/addons";
-import { useEffect, useGlobals } from "@storybook/addons";
+import { useEffect, useGlobals, useMemo } from "@storybook/addons";
+
+import { clearStyles, addOutlineStyles } from './helpers';
+import outlineCSS from './outlineCSS';
 
 export const withGlobals: DecoratorFunction = (StoryFn, context) => {
-  const [{ myAddon }] = useGlobals();
+  const [{ outlineActive }, updateGlobals] = useGlobals();
   // Is the addon being used in the docs panel
   const isInDocs = context.viewMode === "docs";
 
-  useEffect(() => {
-    // Execute your side effect here
-    // For example, to manipulate the contents of the preview
-    const selectorId = isInDocs
-      ? `#anchor--${context.id} .docs-story`
-      : `#root`;
+  const outlineStyles = useMemo(() => {
+    const selector = isInDocs ? `#anchor--${context.id} .docs-story` : '.sb-show-main';
 
-    displayToolState(selectorId, {
-      myAddon,
-      isInDocs,
-    });
-  }, [myAddon]);
+    return outlineCSS(selector);
+  }, [context.id]);
+
+  useEffect(() => {
+    const selectorId = isInDocs ? `addon-outline-docs-${context.id}` : `addon-outline`;
+
+    if (!outlineActive) {
+      clearStyles(selectorId);
+      return;
+    }
+
+    addOutlineStyles(selectorId, outlineStyles);
+
+    return () => {
+      clearStyles(selectorId);
+    };
+  }, [outlineActive, outlineStyles, context.id]);
 
   return StoryFn();
 };
